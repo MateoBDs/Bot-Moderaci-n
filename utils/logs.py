@@ -24,18 +24,11 @@ async def send_log(guild, embed):
         await channel.send(embed=embed)
 
 
-async def send_punishment(guild, content, embed):
+async def send_punishment(guild, embed):
     data = await get_config(guild.id)
     if not data or not data[1]:
         return
 
     channel = guild.get_channel(data[1])
     if channel:
-        await channel.send(content=content, embed=embed)
-
-
-async def send_dm(member, embed):
-    try:
-        await member.send(embed=embed)
-    except:
-        pass
+        await channel.send(embed=embed)
