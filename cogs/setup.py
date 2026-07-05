@@ -23,7 +23,6 @@ class Setup(commands.Cog):
         await interaction.response.defer()
 
         async with aiosqlite.connect(DB_NAME) as db:
-
             await db.execute("""
             INSERT INTO guild_config (guild_id, logs_channel, punishments_channel, mod_role)
             VALUES (?, ?, ?, ?)
@@ -40,7 +39,7 @@ class Setup(commands.Cog):
 
             await db.commit()
 
-        await interaction.followup.send("✅ Setup completo")
+        await interaction.followup.send("✅ Setup listo")
 
 
 async def setup(bot):
