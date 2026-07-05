@@ -5,7 +5,6 @@ from discord.ext import commands
 from discord import app_commands
 
 DB_NAME = "database.db"
-
 GUILD_ID = 1522869805462589593
 
 
@@ -19,17 +18,21 @@ class Setup(commands.Cog):
         async with aiosqlite.connect(DB_NAME) as db:
 
             cursor = await db.execute(
-                "SELECT guild_id FROM guild_config WHERE guild_id = ?",
+                """
+                SELECT guild_id
+                FROM guild_config
+                WHERE guild_id = ?
+                """,
                 (guild_id,)
             )
 
             data = await cursor.fetchone()
 
-            if not data:
+            if data is None:
 
                 await db.execute(
                     """
-                    INSERT INTO guild_config(
+                    INSERT INTO guild_config (
                         guild_id,
                         logs_channel,
                         punishments_channel,
@@ -47,7 +50,7 @@ class Setup(commands.Cog):
     )
     @app_commands.command(
         name="setup_logs",
-        description="Configura el canal de logs."
+        description="Configura el canal de logs"
     )
     @app_commands.default_permissions(administrator=True)
     async def setup_logs(
@@ -56,9 +59,7 @@ class Setup(commands.Cog):
         canal: discord.TextChannel
     ):
 
-        await self.ensure_guild(
-            interaction.guild.id
-        )
+        await self.ensure_guild(interaction.guild.id)
 
         async with aiosqlite.connect(DB_NAME) as db:
 
@@ -85,7 +86,7 @@ class Setup(commands.Cog):
     )
     @app_commands.command(
         name="setup_sanciones",
-        description="Configura el canal de sanciones."
+        description="Configura el canal de sanciones"
     )
     @app_commands.default_permissions(administrator=True)
     async def setup_sanciones(
@@ -94,9 +95,7 @@ class Setup(commands.Cog):
         canal: discord.TextChannel
     ):
 
-        await self.ensure_guild(
-            interaction.guild.id
-        )
+        await self.ensure_guild(interaction.guild.id)
 
         async with aiosqlite.connect(DB_NAME) as db:
 
@@ -123,7 +122,7 @@ class Setup(commands.Cog):
     )
     @app_commands.command(
         name="setup_modrole",
-        description="Configura el rol de moderación."
+        description="Configura el rol moderador"
     )
     @app_commands.default_permissions(administrator=True)
     async def setup_modrole(
@@ -132,9 +131,7 @@ class Setup(commands.Cog):
         rol: discord.Role
     ):
 
-        await self.ensure_guild(
-            interaction.guild.id
-        )
+        await self.ensure_guild(interaction.guild.id)
 
         async with aiosqlite.connect(DB_NAME) as db:
 
@@ -161,12 +158,14 @@ class Setup(commands.Cog):
     )
     @app_commands.command(
         name="setup_ver",
-        description="Ver configuración actual."
+        description="Ver configuración actual"
     )
     async def setup_ver(
         self,
         interaction: discord.Interaction
     ):
+
+        await self.ensure_guild(interaction.guild.id)
 
         async with aiosqlite.connect(DB_NAME) as db:
 
@@ -186,34 +185,35 @@ class Setup(commands.Cog):
 
             data = await cursor.fetchone()
 
-        if not data:
+        if data is None:
 
             await interaction.response.send_message(
                 "❌ No hay configuración."
             )
+
             return
 
-        logs, sanciones, mod_role = data
+        logs_channel, punishments_channel, mod_role = data
 
         embed = discord.Embed(
-            title="⚙️ Configuración",
-            color=discord.Color.blurple()
+            title="⚙️ Configuración del servidor",
+            color=discord.Color.green()
         )
 
         embed.add_field(
-            name="Logs",
-            value=f"<#{logs}>" if logs else "No configurado",
+            name="📋 Canal Logs",
+            value=f"<#{logs_channel}>" if logs_channel else "No configurado",
             inline=False
         )
 
         embed.add_field(
-            name="Sanciones",
-            value=f"<#{sanciones}>" if sanciones else "No configurado",
+            name="🔨 Canal Sanciones",
+            value=f"<#{punishments_channel}>" if punishments_channel else "No configurado",
             inline=False
         )
 
         embed.add_field(
-            name="Rol Moderador",
+            name="👮 Rol Moderador",
             value=f"<@&{mod_role}>" if mod_role else "No configurado",
             inline=False
         )
