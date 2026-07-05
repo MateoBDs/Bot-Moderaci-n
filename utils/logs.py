@@ -16,19 +16,26 @@ async def get_config(guild_id):
 
 async def send_log(guild, embed):
     data = await get_config(guild.id)
+
     if not data or not data[0]:
         return
 
     channel = guild.get_channel(data[0])
+
     if channel:
         await channel.send(embed=embed)
 
 
-async def send_punishment(guild, embed):
+async def send_punishment(guild, content, embed):
     data = await get_config(guild.id)
+
     if not data or not data[1]:
         return
 
     channel = guild.get_channel(data[1])
+
     if channel:
-        await channel.send(embed=embed)
+        await channel.send(
+            content=content,
+            embed=embed
+        )
