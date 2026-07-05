@@ -8,17 +8,14 @@ from dotenv import load_dotenv
 from config import GUILDS
 from data.database import init_db
 
-# Cargar variables de entorno
 load_dotenv()
 
 TOKEN = os.getenv("TOKEN")
 
-# Intents
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-# Bot
 bot = commands.Bot(
     command_prefix="!",
     intents=intents
@@ -30,19 +27,14 @@ async def on_ready():
     print(f"✅ Conectado como {bot.user} ({bot.user.id})")
 
     for guild_id in GUILDS:
+        guild = discord.Object(id=guild_id)
+
         try:
-            guild = discord.Object(id=guild_id)
-
             synced = await bot.tree.sync(guild=guild)
-
-            print(
-                f"✅ {len(synced)} slash commands sincronizados en {guild_id}"
-            )
+            print(f"✅ {len(synced)} comandos sincronizados en {guild_id}")
 
         except Exception as e:
-            print(
-                f"❌ Error sincronizando {guild_id}: {e}"
-            )
+            print(f"❌ Error sync {guild_id}: {e}")
 
 
 async def load_cogs():
@@ -55,25 +47,16 @@ async def load_cogs():
 
             try:
                 await bot.load_extension(extension)
-
-                print(
-                    f"✅ Cog cargado: {extension}"
-                )
+                print(f"✅ Cog cargado: {extension}")
 
             except Exception as e:
+                print(f"❌ Error cargando {extension}: {e}")
 
-                print(
-                    f"❌ Error cargando {extension}: {e}"
-                )
-
-import os
-
-os.makedirs("data", exist_ok=True)
 
 async def main():
-import os
 
-os.makedirs("data", exist_ok=True)
+    os.makedirs("data", exist_ok=True)  # 👈 esto va AQUÍ pero bien indentado
+
     await init_db()
 
     async with bot:
