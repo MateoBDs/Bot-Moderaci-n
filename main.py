@@ -22,7 +22,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.tree.error
 async def on_app_command_error(interaction, error):
-    print("❌ APP COMMAND ERROR")
+    print("❌ ERROR:")
     traceback.print_exception(type(error), error, error.__traceback__)
 
 
@@ -33,7 +33,7 @@ async def on_ready():
     for guild_id in GUILDS:
         try:
             synced = await bot.tree.sync(guild=discord.Object(id=guild_id))
-            print(f"✅ {len(synced)} cmds sync {guild_id}")
+            print(f"✅ Sync {len(synced)} cmds {guild_id}")
         except Exception as e:
             print("SYNC ERROR:", e)
 
