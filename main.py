@@ -66,9 +66,14 @@ async def load_cogs():
                     f"❌ Error cargando {extension}: {e}"
                 )
 
+import os
+
+os.makedirs("data", exist_ok=True)
 
 async def main():
+import os
 
+os.makedirs("data", exist_ok=True)
     await init_db()
 
     async with bot:
