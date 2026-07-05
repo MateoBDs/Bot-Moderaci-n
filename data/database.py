@@ -1,6 +1,8 @@
 import aiosqlite
 
-DB_NAME = "database.db"
+import os
+
+DB_NAME = os.path.join("data", "database.db")
 
 
 async def init_db():
