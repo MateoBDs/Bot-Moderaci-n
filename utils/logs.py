@@ -90,3 +90,14 @@ async def send_dm(
         )
     except:
         pass
+
+async def get_mod_role(guild_id: int):
+
+    data = await get_guild_config(
+        guild_id
+    )
+
+    if not data:
+        return None
+
+    return data[2]
