@@ -21,7 +21,17 @@ class Moderation(commands.Cog):
         await interaction.response.send_message(
             "🏓 Pong!"
         )
-
+    @app_commands.guilds(
+        discord.Object(id=GUILD_ID)
+    )
+    @app_commands.command(
+        name="test",
+        description="Comando de prueba"
+    )
+    async def test(self, interaction: discord.Interaction):
+        await interaction.response.send_message(
+        "✅ El cog funciona correctamente."
+        )
 
 async def setup(bot):
     await bot.add_cog(
