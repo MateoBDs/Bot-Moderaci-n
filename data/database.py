@@ -4,7 +4,6 @@ DB_NAME = "data/database.db"
 
 
 async def init_db():
-
     async with aiosqlite.connect(DB_NAME) as db:
 
         await db.execute("""
