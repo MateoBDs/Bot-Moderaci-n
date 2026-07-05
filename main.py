@@ -20,60 +20,39 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 
-# =========================
-# ERROR HANDLER GLOBAL
-# =========================
 @bot.tree.error
 async def on_app_command_error(interaction, error):
-    print("❌ ERROR APP COMMAND:")
+    print("❌ APP COMMAND ERROR")
     traceback.print_exception(type(error), error, error.__traceback__)
 
 
-# =========================
-# READY
-# =========================
 @bot.event
 async def on_ready():
-    print(f"✅ Conectado como {bot.user} ({bot.user.id})")
+    print(f"✅ Logged as {bot.user}")
 
     for guild_id in GUILDS:
         try:
-            guild = discord.Object(id=guild_id)
-
-            synced = await bot.tree.sync(guild=guild)
-
-            print(f"✅ {len(synced)} comandos sync en {guild_id}")
-
+            synced = await bot.tree.sync(guild=discord.Object(id=guild_id))
+            print(f"✅ {len(synced)} cmds sync {guild_id}")
         except Exception as e:
-            print(f"❌ Sync error {guild_id}: {e}")
+            print("SYNC ERROR:", e)
 
 
-# =========================
-# LOAD COGS
-# =========================
 async def load_cogs():
-    for file in os.listdir("./cogs"):
-        if file.endswith(".py"):
+    for f in os.listdir("./cogs"):
+        if f.endswith(".py"):
             try:
-                await bot.load_extension(f"cogs.{file[:-3]}")
-                print(f"✅ Cog: {file}")
+                await bot.load_extension(f"cogs.{f[:-3]}")
+                print("Cog:", f)
             except Exception as e:
-                print(f"❌ Cog error {file}: {e}")
+                print("Cog error:", e)
 
 
-# =========================
-# MAIN
-# =========================
 async def main():
-
-    os.makedirs("data", exist_ok=True)
-
     await init_db()
 
     async with bot:
-
         await load_cogs()
-
         await bot.start(TOKEN)
 
 
