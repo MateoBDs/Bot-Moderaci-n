@@ -1,103 +1,41 @@
 import aiosqlite
 import discord
 
-DB_NAME = "database.db"
+DB_NAME = "data/database.db"
 
 
-async def get_guild_config(guild_id: int):
-
+async def get_config(guild_id):
     async with aiosqlite.connect(DB_NAME) as db:
-
-        cursor = await db.execute(
-            """
-            SELECT
-                logs_channel,
-                punishments_channel,
-                mod_role
-            FROM guild_config
-            WHERE guild_id = ?
-            """,
-            (guild_id,)
-        )
-
+        cursor = await db.execute("""
+        SELECT logs_channel, punishments_channel
+        FROM guild_config
+        WHERE guild_id = ?
+        """, (guild_id,))
         return await cursor.fetchone()
 
 
-async def send_log(
-    guild: discord.Guild,
-    embed: discord.Embed
-):
-
-    data = await get_guild_config(
-        guild.id
-    )
-
-    if not data:
+async def send_log(guild, embed):
+    data = await get_config(guild.id)
+    if not data or not data[0]:
         return
 
-    logs_channel = data[0]
-
-    if not logs_channel:
-        return
-
-    channel = guild.get_channel(
-        logs_channel
-    )
-
+    channel = guild.get_channel(data[0])
     if channel:
-        await channel.send(
-            embed=embed
-        )
+        await channel.send(embed=embed)
 
 
-async def send_punishment(
-    guild: discord.Guild,
-    content: str,
-    embed: discord.Embed
-):
-
-    data = await get_guild_config(
-        guild.id
-    )
-
-    if not data:
+async def send_punishment(guild, content, embed):
+    data = await get_config(guild.id)
+    if not data or not data[1]:
         return
 
-    punishments_channel = data[1]
-
-    if not punishments_channel:
-        return
-
-    channel = guild.get_channel(
-        punishments_channel
-    )
-
+    channel = guild.get_channel(data[1])
     if channel:
-        await channel.send(
-            content=content,
-            embed=embed
-        )
+        await channel.send(content=content, embed=embed)
 
 
-async def send_dm(
-    member: discord.Member,
-    embed: discord.Embed
-):
-
+async def send_dm(member, embed):
     try:
-        await member.send(
-            embed=embed
-        )
+        await member.send(embed=embed)
     except:
         pass
-
-async def get_mod_role(guild_id: int):
-
-    data = await get_guild_config(
-        guild_id
-    )
-
-    if not data:
-        return None
-
-    return data[2]
