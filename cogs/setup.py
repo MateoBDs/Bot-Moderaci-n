@@ -22,7 +22,10 @@ class Setup(commands.Cog):
 
     @app_commands.guilds(discord.Object(id=GUILD_ID))
     @app_commands.check(lambda i: i.user.guild_permissions.administrator)
-    @app_commands.command(name="setup")
+    @app_commands.command(
+        name="setup",
+        description="Configura los canales y rol de moderación"
+    )
     async def setup(self, interaction: discord.Interaction,
                     logs: discord.TextChannel,
                     sanciones: discord.TextChannel,
