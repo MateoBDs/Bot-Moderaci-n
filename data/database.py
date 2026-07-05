@@ -6,6 +6,7 @@ DB_NAME = "database.db"
 async def init_db():
     async with aiosqlite.connect(DB_NAME) as db:
 
+        # Configuración por servidor
         await db.execute("""
         CREATE TABLE IF NOT EXISTS guild_config(
             guild_id INTEGER PRIMARY KEY,
@@ -15,6 +16,7 @@ async def init_db():
         )
         """)
 
+        # Warnings
         await db.execute("""
         CREATE TABLE IF NOT EXISTS warnings(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,11 +28,39 @@ async def init_db():
         )
         """)
 
+        # Historial completo de sanciones
+        await db.execute("""
+        CREATE TABLE IF NOT EXISTS punishments(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            guild_id INTEGER,
+            user_id INTEGER,
+            moderator_id INTEGER,
+            action TEXT,
+            reason TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
+
+        # Mutes activos
         await db.execute("""
         CREATE TABLE IF NOT EXISTS mutes(
-            user_id INTEGER,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             guild_id INTEGER,
-            end_time INTEGER
+            user_id INTEGER,
+            moderator_id INTEGER,
+            reason TEXT,
+            start_time INTEGER,
+            end_time INTEGER,
+            active INTEGER DEFAULT 1
+        )
+        """)
+
+        # Roles guardados para restaurar tras un mute
+        await db.execute("""
+        CREATE TABLE IF NOT EXISTS mute_roles(
+            guild_id INTEGER,
+            user_id INTEGER,
+            roles TEXT
         )
         """)
 
