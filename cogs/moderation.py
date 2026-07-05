@@ -5,6 +5,9 @@ import datetime
 from discord.ext import commands
 from discord import app_commands
 
+from utils.permissions import is_mod
+from utils.logs import send_log, send_punishment, send_dm
+
 DB_NAME = "data/database.db"
 GUILD_ID = 1522869805462589593
 
@@ -16,32 +19,44 @@ class Moderation(commands.Cog):
 
 
     @app_commands.guilds(discord.Object(id=GUILD_ID))
-    @app_commands.command(name="ping")
-    async def ping(self, interaction: discord.Interaction):
-        await interaction.response.send_message("🏓 Pong!")
-
-
-    @app_commands.guilds(discord.Object(id=GUILD_ID))
     @app_commands.command(name="warn")
-    async def warn(self, interaction: discord.Interaction, usuario: discord.Member, razon: str):
+    async def warn(self, interaction: discord.Interaction, user: discord.Member, reason: str):
 
         await interaction.response.defer()
+
+        if not await is_mod(interaction.user):
+            return await interaction.followup.send("❌ No perms")
 
         async with aiosqlite.connect(DB_NAME) as db:
 
             await db.execute("""
             INSERT INTO warnings (guild_id, user_id, moderator_id, reason)
             VALUES (?, ?, ?, ?)
-            """, (interaction.guild.id, usuario.id, interaction.user.id, razon))
+            """, (interaction.guild.id, user.id, interaction.user.id, reason))
+
+            await db.execute("""
+            INSERT INTO punishments (guild_id, user_id, moderator_id, action, reason)
+            VALUES (?, ?, ?, ?, ?)
+            """, (interaction.guild.id, user.id, interaction.user.id, "WARN", reason))
 
             await db.commit()
 
-        await interaction.followup.send(f"⚠️ Warn a {usuario.mention}")
+        embed = discord.Embed(
+            title="⚠ WARN",
+            description=f"{user.mention} | {reason}",
+            color=discord.Color.orange()
+        )
+
+        await send_punishment(interaction.guild, user.mention, embed)
+        await send_log(interaction.guild, embed)
+        await send_dm(user, embed)
+
+        await interaction.followup.send("✅ Warn hecho")
 
 
     @app_commands.guilds(discord.Object(id=GUILD_ID))
     @app_commands.command(name="warnings")
-    async def warnings(self, interaction: discord.Interaction, usuario: discord.Member):
+    async def warnings(self, interaction: discord.Interaction, user: discord.Member):
 
         await interaction.response.defer()
 
@@ -51,33 +66,22 @@ class Moderation(commands.Cog):
             SELECT id, moderator_id, reason, created_at
             FROM warnings
             WHERE guild_id = ? AND user_id = ?
-            ORDER BY id DESC
-            """, (interaction.guild.id, usuario.id))
+            """, (interaction.guild.id, user.id))
 
-            warns = await cursor.fetchall()
+            rows = await cursor.fetchall()
 
-        if not warns:
+        if not rows:
             return await interaction.followup.send("Sin warns")
 
+        text = ""
+        for r in rows:
+            text += f"#{r[0]} | <@{r[1]}> | {r[2]} | <t:{int(datetime.datetime.now().timestamp())}:F>\n"
+
         embed = discord.Embed(
-            title=f"Warnings {usuario.display_name}",
+            title="Warnings",
+            description=text,
             color=discord.Color.orange()
         )
-
-        text = ""
-
-        for wid, mod, reason, created in warns:
-
-            try:
-                ts = int(datetime.datetime.strptime(
-                    created, "%Y-%m-%d %H:%M:%S"
-                ).timestamp())
-            except:
-                ts = 0
-
-            text += f"#{wid} | <@{mod}> | {reason} | <t:{ts}:F>\n"
-
-        embed.description = text
 
         await interaction.followup.send(embed=embed)
 
