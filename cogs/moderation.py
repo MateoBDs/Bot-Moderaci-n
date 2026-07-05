@@ -5,8 +5,6 @@ import datetime
 from discord.ext import commands
 from discord import app_commands
 
-from utils.permissions import is_mod
-
 DB_NAME = "data/database.db"
 GUILD_ID = 1522869805462589593
 
@@ -17,26 +15,17 @@ class Moderation(commands.Cog):
         self.bot = bot
 
 
-    # =========================
-    # /ping
-    # =========================
     @app_commands.guilds(discord.Object(id=GUILD_ID))
     @app_commands.command(name="ping")
     async def ping(self, interaction: discord.Interaction):
         await interaction.response.send_message("🏓 Pong!")
 
 
-    # =========================
-    # /warn
-    # =========================
     @app_commands.guilds(discord.Object(id=GUILD_ID))
     @app_commands.command(name="warn")
     async def warn(self, interaction: discord.Interaction, usuario: discord.Member, razon: str):
 
         await interaction.response.defer()
-
-        if not await is_mod(interaction.user):
-            return await interaction.followup.send("❌ No permisos")
 
         async with aiosqlite.connect(DB_NAME) as db:
 
@@ -47,12 +36,9 @@ class Moderation(commands.Cog):
 
             await db.commit()
 
-        await interaction.followup.send(f"⚠️ Warn dado a {usuario.mention}")
+        await interaction.followup.send(f"⚠️ Warn a {usuario.mention}")
 
 
-    # =========================
-    # /warnings
-    # =========================
     @app_commands.guilds(discord.Object(id=GUILD_ID))
     @app_commands.command(name="warnings")
     async def warnings(self, interaction: discord.Interaction, usuario: discord.Member):
@@ -74,7 +60,7 @@ class Moderation(commands.Cog):
             return await interaction.followup.send("Sin warns")
 
         embed = discord.Embed(
-            title=f"Warnings de {usuario}",
+            title=f"Warnings {usuario.display_name}",
             color=discord.Color.orange()
         )
 
