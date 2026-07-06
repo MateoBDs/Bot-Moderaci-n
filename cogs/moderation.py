@@ -8,7 +8,7 @@ from discord import app_commands
 from utils.permissions import is_mod
 from utils.logs import send_log, send_punishment
 
-DB_NAME = "data/database.db"
+DB_NAME = "/data/database.db"
 GUILD_ID = 1522869805462589593
 
 
