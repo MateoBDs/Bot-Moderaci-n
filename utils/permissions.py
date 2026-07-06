@@ -1,6 +1,6 @@
 import aiosqlite
 
-DB_NAME = "data/database.db"
+DB_NAME = "/data/database.db"
 
 
 async def is_mod(member):
