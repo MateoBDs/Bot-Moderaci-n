@@ -4,7 +4,7 @@ import aiosqlite
 from discord.ext import commands
 from discord import app_commands
 
-DB_NAME = "data/database.db"
+DB_NAME = "/data/database.db"
 GUILD_ID = 1522869805462589593
 
 
