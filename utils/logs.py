@@ -1,7 +1,7 @@
 import aiosqlite
 import discord
 
-DB_NAME = "data/database.db"
+DB_NAME = "/data/database.db"
 
 
 async def get_config(guild_id):
